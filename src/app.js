@@ -1,15 +1,8 @@
-const fs = require('fs');
 const path = require('path');
 const express = require('express');
+const data = require('./data');
 
-const jsonDir = path.join(__dirname, 'json');
-
-const accountData = fs.readFileSync(jsonDir + '/accounts.json', { encoding: 'UTF8' });
-const accounts = JSON.parse(accountData);
-
-const userData = fs.readFileSync(jsonDir + '/users.json', { encoding: 'UTF8' });
-const users = JSON.parse(userData);
-
+const { accounts, users, writeJSON } = data;
 
 const app = express();
 app.set('views', path.join(__dirname, 'views'));
@@ -46,8 +39,8 @@ app.post('/transfer', function(req, res) {
   const { body: { from, to, amount } } = req;
   accounts[from].balance -= parseInt(amount);
   accounts[to].balance += parseInt(amount);
-  const accountsJSON = JSON.stringify(accounts);
-  fs.writeFileSync(path.join(__dirname, 'json', 'accounts.json'), accountsJSON,  'utf8');
+
+  writeJSON();
 
   res.render('transfer', { message: 'Transfer Completed' });
 });
@@ -61,8 +54,8 @@ app.post('/payment', function(req, res) {
   const amount = parseInt(amt);
   accounts.credit.balance -= amount;
   accounts.credit.available += amount;
-  const accountsJSON = JSON.stringify(accounts);
-  fs.writeFileSync(path.join(__dirname, 'json', 'accounts.json'), accountsJSON, 'utf8');
+
+  writeJSON();
 
   res.render('payment', { message: 'Payment Successful', account: accounts.credit });
 
